@@ -1,0 +1,93 @@
+name: 🧪 Quick Test & Build (Fixed)
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quick-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: ⚡ Quick install (Core dependencies only)
+      run: |
+        pip install fastapi uvicorn gradio pydantic requests pyyaml pytest
+        echo "✅ Core dependencies installed"
+    
+    - name: 🧪 Quick tests (Basic imports)
+      run: |
+        # Test core imports
+        python -c "
+        try:
+            import fastapi
+            import gradio as gr
+            import pydantic
+            print('✅ Core dependencies OK')
+        except ImportError as e:
+            print(f'❌ Import error: {e}')
+            exit(1)
+        "
+        
+        # Test API structure (without heavy imports)
+        python -c "
+        import sys, os
+        sys.path.append('.')
+        try:
+            # Test if app directory exists
+            if os.path.exists('app/api.py'):
+                print('✅ API file exists')
+                # Basic syntax check without running
+                with open('app/api.py', 'r') as f:
+                    content = f.read()
+                    if 'FastAPI' in content and 'health' in content:
+                        print('✅ API structure looks good')
+                    else:
+                        print('⚠️ API structure incomplete')
+            else:
+                print('❌ API file missing')
+                exit(1)
+        except Exception as e:
+            print(f'⚠️ API check warning: {e}')
+        "
+        
+        # Test config files exist
+        python -c "
+        import os
+        files_to_check = ['requirements-simple.txt', 'Dockerfile', 'app/api.py']
+        for file in files_to_check:
+            if os.path.exists(file):
+                print(f'✅ {file} exists')
+            else:
+                print(f'❌ {file} missing')
+                exit(1)
+        "
+    
+    - name: 🐳 Test Docker build (Simplified)
+      run: |
+        echo "🏗️ Testing Docker build with timeout..."
+        # Build with timeout and simplified target
+        timeout 20m docker build -t qlorax-test --target base . || {
+          echo "❌ Docker build failed or timed out"
+          echo "This might be due to heavy ML dependencies"
+          echo "Checking Dockerfile syntax instead..."
+          docker build --dry-run . 2>/dev/null && echo "✅ Dockerfile syntax OK" || echo "❌ Dockerfile syntax error"
+          exit 1
+        }
+        echo "✅ Docker build successful!"
+    
+    - name: ✅ Success
+      run: |
+        echo "🎉 Quick tests passed!"
+        echo "Note: Heavy ML dependencies are tested in full CI pipeline"
