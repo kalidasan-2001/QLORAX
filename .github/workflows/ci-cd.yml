@@ -18,6 +18,13 @@ on:
         default: 'false'
         type: boolean
 
+# Add required permissions for GitHub Container Registry
+permissions:
+  contents: read
+  packages: write
+  actions: read
+  security-events: write
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
