@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  qlorax:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: qlorax-app
+    ports:
+      - "8000:8000"  # FastAPI
+      - "7860:7860"  # Gradio
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+      - ./configs:/app/configs:ro  # Read-only configs
+    environment:
+      - PYTHONPATH=/app
+      - CUDA_VISIBLE_DEVICES=""  # Force CPU mode
+      - TRANSFORMERS_CACHE=/app/models/.cache
+      - HF_HOME=/app/models/.cache
+      - WANDB_DISABLED=true
+      - TOKENIZERS_PARALLELISM=false
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - qlorax-network
+
+  # Optional development service
+  qlorax-dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: qlorax-dev
+    ports:
+      - "8001:8000"  # FastAPI dev
+      - "7861:7860"  # Gradio dev
+    volumes:
+      - .:/app  # Mount entire project for development
+      - ./models:/app/models
+    environment:
+      - PYTHONPATH=/app
+      - CUDA_VISIBLE_DEVICES=""
+      - TRANSFORMERS_CACHE=/app/models/.cache
+      - HF_HOME=/app/models/.cache
+      - WANDB_DISABLED=true
+      - TOKENIZERS_PARALLELISM=false
+      - QLORAX_ENV=development
+    command: python app/api.py --dev
+    networks:
+      - qlorax-network
+    profiles:
+      - dev
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: qlorax-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - qlorax-network
+    profiles:
+      - full
+
+  # Monitoring with Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: qlorax-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - qlorax-network
+    profiles:
+      - monitoring
+
+  # Grafana for visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: qlorax-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - qlorax-network
+    profiles:
+      - monitoring
+
+volumes:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  qlorax-network:
+    driver: bridge

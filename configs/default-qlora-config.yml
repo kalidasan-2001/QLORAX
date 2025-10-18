@@ -1,0 +1,147 @@
+# Axolotl Configuration for QLoRA Fine-tuning
+# Based on research proposal methodology for automated LLM fine-tuning
+
+# Base model configuration
+base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+model_type: llama
+
+# Dataset configuration
+datasets:
+  - path: ./data/my_custom_dataset.jsonl
+    type: jsonl
+    conversation:
+      - input
+      - output
+
+# Training configuration
+output_dir: ./models/tinyllama-qlora
+
+# Fine-tuning type: QLoRA (Quantized LoRA)
+adapter: qlora
+
+# Quantization settings - 4-bit NF4 with double quantization
+load_in_4bit: true
+load_in_8bit: false
+quantization_config:
+  quant_method: bnb
+  load_in_4bit: true
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# LoRA configuration targeting attention and MLP layers
+lora_r: 64
+lora_alpha: 16
+lora_dropout: 0.05
+lora_target_modules:
+  - q_proj
+  - v_proj
+  - k_proj
+  - o_proj
+  - gate_proj
+  - down_proj
+  - up_proj
+lora_target_linear: true
+lora_fan_in_fan_out: false
+lora_modules_to_save:
+  - embed_tokens
+  - lm_head
+
+# Training hyperparameters
+sequence_len: 2048
+sample_packing: true
+pad_to_sequence_len: true
+
+# Optimizer and scheduler
+optimizer: paged_adamw_32bit
+lr_scheduler: cosine
+learning_rate: 0.0002
+train_on_inputs: false
+group_by_length: false
+bf16: auto
+fp16: false
+tf32: false
+
+# Training parameters
+num_epochs: 3
+micro_batch_size: 1
+gradient_accumulation_steps: 4
+eval_batch_size: 1
+batch_size: 4
+max_steps: 
+warmup_steps: 100
+warmup_ratio: 0.03
+logging_steps: 1
+
+# Evaluation and validation
+val_set_size: 0.1
+eval_steps: 50
+eval_table_size: 
+eval_table_max_new_tokens: 128
+save_steps: 100
+save_total_limit: 2
+
+# Memory optimization
+gradient_checkpointing: true
+deepspeed: 
+fsdp: 
+fsdp_config: 
+
+# Model saving
+save_safetensors: true
+hub_model_id: 
+hub_strategy: "every_save"
+push_dataset_to_hub: 
+
+# Weights & Biases logging (optional)
+wandb_project: qlorax-finetuning
+wandb_entity: 
+wandb_watch: false
+wandb_name: tinyllama-qlora-run
+wandb_log_model: false
+
+# Special tokens (adjust based on your dataset format)
+special_tokens:
+  bos_token: "<s>"
+  eos_token: "</s>"
+  unk_token: "<unk>"
+
+# Chat template settings
+chat_template: chatml
+train_on_inputs: false
+
+# Model loading and initialization
+trust_remote_code: false
+use_fast: true
+model_config:
+  output_router_logits: false
+
+# Flash attention (if supported)
+flash_attention: true
+sample_packing: true
+multipack_real_batches: true
+
+# Debugging and development
+debug: false
+deepspeed_zero_stage: 
+weight_decay: 0.0
+adam_beta1: 0.9
+adam_beta2: 0.95
+adam_epsilon: 1e-5
+max_grad_norm: 1.0
+
+# Reproducibility
+seed: 42
+local_rank: 
+ddp_timeout: 1800
+ddp_bucket_cap_mb: 25
+
+# Early stopping
+early_stopping_patience: 3
+
+# Resume training
+resume_from_checkpoint: 
+auto_resume_from_checkpoints: false
+
+# Preprocessing
+preprocess: true

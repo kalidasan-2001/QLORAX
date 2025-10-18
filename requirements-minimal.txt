@@ -1,0 +1,27 @@
+# QLORAX Docker Requirements - CPU-only, lightweight
+# Core ML Framework (CPU-only to reduce size)
+torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu
+transformers>=4.35.0
+tokenizers>=0.15.0
+accelerate>=0.20.0
+datasets>=2.14.0
+peft>=0.6.0
+
+# API and Web Interface  
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+gradio>=4.0.0
+pydantic>=2.0.0
+
+# Core utilities
+numpy>=1.24.0
+requests>=2.30.0
+tqdm>=4.60.0
+pyyaml>=6.0.0
+
+# System utilities
+psutil>=5.9.0
+safetensors>=0.4.0
+
+# Minimal development tools
+jupyter>=1.0.0

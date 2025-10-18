@@ -1,0 +1,198 @@
+name: 🚀 Deploy to Cloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: 'Choose deployment target'
+        required: true
+        default: 'huggingface'
+        type: choice
+        options:
+        - huggingface
+        - cloudrun
+        - railway
+        - render
+      model_path:
+        description: 'Model path (optional)'
+        required: false
+        default: ''
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy-huggingface:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.deployment_target == 'huggingface'
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+    
+    - name: 🤗 Deploy to Hugging Face Spaces
+      run: |
+        echo "🚀 Deploying QLORAX to Hugging Face Spaces"
+        echo "1. Create a new Space at https://huggingface.co/new-space"
+        echo "2. Choose Docker as the Space type"
+        echo "3. Use this Dockerfile configuration:"
+        echo ""
+        cat << 'EOF'
+        # Hugging Face Spaces Dockerfile
+        FROM python:3.11-slim
+        
+        WORKDIR /app
+        
+        # Install system dependencies
+        RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+        
+        # Copy and install requirements
+        COPY requirements-simple.txt .
+        RUN pip install -r requirements-simple.txt
+        RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        RUN pip install transformers peft datasets accelerate
+        
+        # Copy application
+        COPY . .
+        
+        # Expose port (Hugging Face uses 7860)
+        EXPOSE 7860
+        
+        # Start Gradio interface
+        CMD ["python", "app/gradio_app.py"]
+        EOF
+        
+        echo ""
+        echo "4. Push your code to the Space repository"
+        echo "5. Your app will be available at: https://huggingface.co/spaces/YOUR_USERNAME/qlorax"
+
+  deploy-cloudrun:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.deployment_target == 'cloudrun'
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+    
+    - name: 🔐 Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: 🐳 Configure Docker for GCR
+      run: gcloud auth configure-docker
+    
+    - name: 🏗️ Build and push image
+      run: |
+        IMAGE_URI=gcr.io/${{ secrets.GCP_PROJECT_ID }}/qlorax:${{ github.sha }}
+        docker build -t $IMAGE_URI .
+        docker push $IMAGE_URI
+        
+        # Deploy to Cloud Run
+        gcloud run deploy qlorax \
+          --image $IMAGE_URI \
+          --platform managed \
+          --region us-central1 \
+          --allow-unauthenticated \
+          --port 8000 \
+          --memory 4Gi \
+          --cpu 2 \
+          --timeout 3600
+        
+        echo "🎉 Deployed to Cloud Run!"
+
+  deploy-railway:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.deployment_target == 'railway'
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+    
+    - name: 🚂 Deploy to Railway
+      run: |
+        echo "🚀 Deploying QLORAX to Railway"
+        echo "1. Install Railway CLI: npm install -g @railway/cli"
+        echo "2. Login: railway login"
+        echo "3. Initialize: railway init"
+        echo "4. Deploy: railway up"
+        echo ""
+        echo "Or use Railway's GitHub integration:"
+        echo "1. Connect your repository at https://railway.app"
+        echo "2. Railway will auto-deploy on commits"
+        echo "3. Set environment variables in Railway dashboard"
+        echo ""
+        echo "Required environment variables:"
+        echo "  PORT=8000"
+        echo "  PYTHONPATH=/app"
+        echo "  QLORAX_ENV=production"
+
+  deploy-render:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.deployment_target == 'render'
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+    
+    - name: 🎨 Deploy to Render
+      run: |
+        echo "🚀 Deploying QLORAX to Render"
+        echo "1. Connect your repository at https://render.com"
+        echo "2. Create a new Web Service"
+        echo "3. Use these settings:"
+        echo ""
+        echo "Build Command: pip install -r requirements-simple.txt && pip install torch --index-url https://download.pytorch.org/whl/cpu && pip install transformers peft"
+        echo "Start Command: python app/api.py --host 0.0.0.0 --port \$PORT"
+        echo ""
+        echo "Environment Variables:"
+        echo "  PYTHONPATH=/opt/render/project/src"
+        echo "  QLORAX_ENV=production"
+        echo "  PORT=10000"
+        echo ""
+        echo "Health Check Path: /health"
+
+  deployment-docs:
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: 📚 Deployment Documentation
+      run: |
+        echo "📖 QLORAX Deployment Options Summary"
+        echo "=================================="
+        echo ""
+        echo "1. 🤗 Hugging Face Spaces (Free)"
+        echo "   - Perfect for demos and prototypes"
+        echo "   - Automatic Docker builds"
+        echo "   - Public or private spaces"
+        echo "   - URL: https://huggingface.co/spaces"
+        echo ""
+        echo "2. ☁️ Google Cloud Run"
+        echo "   - Serverless container deployment"
+        echo "   - Pay-per-use scaling"
+        echo "   - Custom domains"
+        echo "   - Requires GCP account"
+        echo ""
+        echo "3. 🚂 Railway"
+        echo "   - Developer-friendly platform"
+        echo "   - Git-based deployments"
+        echo "   - Database integration"
+        echo "   - Free tier available"
+        echo ""
+        echo "4. 🎨 Render"
+        echo "   - Simple static & web services"
+        echo "   - GitHub integration"
+        echo "   - Free tier for demos"
+        echo "   - Auto-scaling"
+        echo ""
+        echo "5. 🐳 Self-hosted Docker"
+        echo "   - Full control"
+        echo "   - Use docker-compose.yml"
+        echo "   - Suitable for production"
+        echo ""
+        echo "Choose based on your needs:"
+        echo "• Demo/Prototype → Hugging Face Spaces"
+        echo "• Production → Cloud Run or self-hosted"
+        echo "• Development → Railway or Render"

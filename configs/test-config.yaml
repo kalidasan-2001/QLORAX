@@ -1,0 +1,67 @@
+# QLORAX Test Configuration
+# Quick test configuration for validation
+
+# Model Configuration
+model_name: "gpt2"  # Smaller model for testing
+torch_dtype: "float32"
+device_map: "cpu"
+trust_remote_code: false
+
+# Data Configuration
+data_path: "data/training_data.jsonl"
+validation_split: 0.0  # No validation for quick test
+prompt_template: "### Input:\n{input}\n\n### Output:\n{output}"
+max_length: 128  # Shorter for testing
+
+# QLoRA Configuration - Simplified for testing
+load_in_4bit: false  # No quantization for CPU
+bnb_4bit_quant_type: "nf4"
+bnb_4bit_use_double_quant: false
+bnb_4bit_compute_dtype: "float32"
+
+# LoRA Parameters - Minimal for testing
+lora_r: 8
+lora_alpha: 16
+lora_dropout: 0.1
+lora_target_modules:
+  - "c_attn"  # Only one target for GPT-2
+lora_bias: "none"
+
+# Training Parameters - Minimal for testing
+num_epochs: 1
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 1
+learning_rate: 5.0e-5
+weight_decay: 0.01
+adam_beta1: 0.9
+adam_beta2: 0.999
+max_grad_norm: 1.0
+
+# Learning Rate Schedule
+lr_scheduler_type: "linear"
+warmup_ratio: 0.1
+
+# Optimization
+fp16: false
+bf16: false
+gradient_checkpointing: false
+dataloader_num_workers: 0
+
+# Logging and Saving - Minimal
+output_dir: "test_output"
+logging_steps: 1
+save_steps: 1000  # Don't save during test
+save_total_limit: 1
+eval_steps: 1000
+
+# Early Stopping
+early_stopping_patience: 10
+
+# Monitoring - Disabled
+use_wandb: false
+wandb_project: "qlorax-test"
+experiment_name: "test-run"
+
+# Reproducibility
+seed: 42

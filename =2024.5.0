@@ -1,0 +1,46 @@
+Collecting adlfs
+  Downloading adlfs-2025.8.0-py3-none-any.whl.metadata (7.7 kB)
+Collecting autoawq==0.2.7.post3
+  Downloading autoawq-0.2.7.post3-py3-none-any.whl.metadata (18 kB)
+Collecting axolotl-contribs-lgpl==0.0.6
+  Downloading axolotl_contribs_lgpl-0.0.6.tar.gz (10 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting axolotl-contribs-mit==0.0.5
+  Downloading axolotl_contribs_mit-0.0.5.tar.gz (21 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting gcsfs
+  Downloading gcsfs-2025.9.0-py2.py3-none-any.whl.metadata (2.1 kB)
+Collecting hf_xet==1.1.5
+  Downloading hf_xet-1.1.5-cp37-abi3-win_amd64.whl.metadata (883 bytes)
+Collecting kernels==0.9.0
+  Downloading kernels-0.9.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting liger-kernel==0.6.1
+  Downloading liger_kernel-0.6.1-py3-none-any.whl.metadata (24 kB)
+Collecting lm_eval==0.4.7
+  Downloading lm_eval-0.4.7-py3-none-any.whl.metadata (46 kB)
+Collecting mistral-common==1.8.3
+  Downloading mistral_common-1.8.3-py3-none-any.whl.metadata (3.8 kB)
+Collecting modal==1.0.2
+  Downloading modal-1.0.2-py3-none-any.whl.metadata (2.4 kB)
+Collecting nvidia-ml-py==12.560.30
+  Downloading nvidia_ml_py-12.560.30-py3-none-any.whl.metadata (8.6 kB)
+Collecting ocifs==1.3.2
+  Downloading ocifs-1.3.2-py3-none-any.whl.metadata (9.0 kB)
+Collecting s3fs
+  Downloading s3fs-2025.9.0-py3-none-any.whl.metadata (1.4 kB)
+Collecting schedulefree==1.4.1
+  Downloading schedulefree-1.4.1-py3-none-any.whl.metadata (9.7 kB)
+Collecting torchao==0.12.0
+  Downloading torchao-0.12.0-py3-none-any.whl.metadata (19 kB)
+Collecting trackio
+  Downloading trackio-0.5.2-py3-none-any.whl.metadata (7.8 kB)

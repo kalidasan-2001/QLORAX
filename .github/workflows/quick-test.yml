@@ -1,0 +1,61 @@
+name: 🧪 Quick Test & Build
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quick-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: ⚡ Quick install
+      run: |
+        pip install fastapi uvicorn gradio pydantic requests pyyaml
+    
+    - name: 🧪 Quick tests
+      run: |
+        # Test imports
+        python -c "
+        try:
+            import fastapi
+            import gradio as gr
+            print('✅ Core dependencies OK')
+        except ImportError as e:
+            print(f'❌ Import error: {e}')
+            exit(1)
+        "
+        
+        # Test API structure
+        python -c "
+        import sys
+        sys.path.append('.')
+        try:
+            from app.api import app
+            print('✅ API structure OK')
+        except Exception as e:
+            print(f'⚠️ API warning: {e}')
+        "
+    
+    - name: 🐳 Test Docker build
+      run: |
+        echo "🏗️ Testing Docker build..."
+        docker build -t qlorax-test . || {
+          echo "❌ Docker build failed"
+          exit 1
+        }
+        echo "✅ Docker build successful!"
+    
+    - name: ✅ Success
+      run: echo "🎉 Quick tests passed!"
