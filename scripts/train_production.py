@@ -252,7 +252,7 @@ class ProductionTrainer:
             logging_steps=self.config.get('logging_steps', 10),
             save_steps=self.config.get('save_steps', 500),
             save_total_limit=self.config.get('save_total_limit', 3),
-            eval_strategy="steps" if eval_dataset else "no",
+            evaluation_strategy="steps" if eval_dataset else "no",
             eval_steps=self.config.get('eval_steps', 500) if eval_dataset else None,
             
             # Performance

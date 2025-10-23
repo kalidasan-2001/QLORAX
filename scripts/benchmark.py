@@ -120,7 +120,7 @@ class ModelBenchmark:
         
         with torch.no_grad():
             outputs = self.model.generate(
-                inputs,
+                input_ids=inputs,
                 max_length=inputs.shape[1] + max_length,
                 num_return_sequences=1,
                 temperature=0.7,

@@ -29,11 +29,11 @@ def load_model_simple():
     
     try:
         # Use the checkpoint with adapters
-        adapter_path = "models/production-model/checkpoints"
+        adapter_path = "models/production-model"
         base_model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
         
         print("📥 Loading tokenizer...")
-        tokenizer = AutoTokenizer.from_pretrained(adapter_path)
+        tokenizer = AutoTokenizer.from_pretrained(base_model_name)
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
         print("✅ Tokenizer loaded!")
@@ -48,7 +48,7 @@ def load_model_simple():
         print("✅ Base model loaded!")
         
         print("🔧 Loading LoRA adapters...")
-        model = PeftModel.from_pretrained(base_model, adapter_path)
+        model = PeftModel.from_pretrained(base_model, adapter_path + "/checkpoints")
         print("✅ LoRA adapters loaded!")
         
         # Get model info
@@ -80,8 +80,7 @@ def generate_text(model, tokenizer, prompt, max_length=150, temperature=0.7):
         # Generate
         start_time = time.time()
         with torch.no_grad():
-            outputs = model.generate(
-                inputs,
+            outputs = model.generate(input_ids=inputs,
                 max_length=inputs.shape[1] + max_length,
                 temperature=temperature,
                 do_sample=True,
